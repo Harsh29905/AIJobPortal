@@ -18,7 +18,7 @@ db.sqlite3
 media/
 
 # IDE
-.vscode/
+.vscode/    
 
 # Test and coverage files
 .coverage
