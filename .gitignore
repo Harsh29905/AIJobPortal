@@ -1,25 +1,33 @@
 
-# Python
-__pycache__/
-*.py[cod]
-*.pyo
+# Environment variables
+.env
 
 # Virtual environments
 venv/
 venv312/
 .venv/
 
-# Environment variables and secrets
-.env
-
-# Django
-*.log
+# Local database
 db.sqlite3
+
+# User-uploaded media
 media/
 
-# IDE
-.vscode/    
+# VS Code settings
+.vscode/
+
+# Python cache
+__pycache__/
+*.py[cod]
+
+# Logs
+*.log
 
 # Test and coverage files
 .coverage
 htmlcov/
+.pytest_cache/
+
+# Operating system files
+.DS_Store
+Thumbs.db
