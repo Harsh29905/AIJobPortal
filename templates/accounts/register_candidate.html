@@ -1,0 +1,104 @@
+{% extends 'base.html' %}
+
+{% block title %}Register as Job Seeker - JobPortal AI{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-7 col-md-9">
+            <div class="card shadow-sm border-0 rounded-3">
+                <div class="card-body p-4 p-md-5">
+                    <div class="text-center mb-4">
+                        <span class="badge bg-primary-subtle text-primary border border-primary-subtle px-3 py-2 rounded-pill mb-2">
+                            <i class="bi bi-person-badge me-1"></i> Job Seeker Registration
+                        </span>
+                        <h3 class="fw-bold">Create Your Candidate Profile</h3>
+                        <p class="text-muted small">Unlock AI recommendations and direct applications</p>
+                    </div>
+
+                    <form method="post" novalidate>
+                        {% csrf_token %}
+
+                        {% if form.non_field_errors %}
+                            <div class="alert alert-danger py-2 small">
+                                {% for error in form.non_field_errors %}
+                                    <div>{{ error }}</div>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+
+                        <h6 class="fw-bold text-primary mb-3"><i class="bi bi-shield-lock me-1"></i> Account Credentials</h6>
+                        <div class="row g-3 mb-3">
+                            <div class="col-md-6">
+                                <label class="form-label small fw-semibold">Username *</label>
+                                {{ form.username }}
+                                {% if form.username.errors %}<div class="text-danger small">{{ form.username.errors.0 }}</div>{% endif %}
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label small fw-semibold">Email Address *</label>
+                                {{ form.email }}
+                                {% if form.email.errors %}<div class="text-danger small">{{ form.email.errors.0 }}</div>{% endif %}
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label small fw-semibold">First Name *</label>
+                                {{ form.first_name }}
+                                {% if form.first_name.errors %}<div class="text-danger small">{{ form.first_name.errors.0 }}</div>{% endif %}
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label small fw-semibold">Last Name *</label>
+                                {{ form.last_name }}
+                                {% if form.last_name.errors %}<div class="text-danger small">{{ form.last_name.errors.0 }}</div>{% endif %}
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label small fw-semibold">Password *</label>
+                                {{ form.password1 }}
+                                {% if form.password1.errors %}<div class="text-danger small">{{ form.password1.errors.0 }}</div>{% endif %}
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label small fw-semibold">Confirm Password *</label>
+                                {{ form.password2 }}
+                                {% if form.password2.errors %}<div class="text-danger small">{{ form.password2.errors.0 }}</div>{% endif %}
+                            </div>
+                        </div>
+
+                        <hr class="my-4">
+
+                        <h6 class="fw-bold text-primary mb-3"><i class="bi bi-stars me-1"></i> Career & AI Matching Profile</h6>
+                        <div class="mb-3">
+                            <label class="form-label small fw-semibold">Professional Headline</label>
+                            {{ form.headline }}
+                            <div class="form-text small">e.g. Full Stack Python Developer | Django & MySQL</div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label small fw-semibold">Core Skills</label>
+                            {{ form.skills }}
+                            <div class="form-text small">Comma-separated skills used for AI recommendation (e.g. Python, Django, MySQL, React, Docker).</div>
+                        </div>
+
+                        <div class="row g-3 mb-3">
+                            <div class="col-md-6">
+                                <label class="form-label small fw-semibold">Years of Experience</label>
+                                {{ form.experience_years }}
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label small fw-semibold">Preferred Work Location</label>
+                                {{ form.preferred_location }}
+                                <div class="form-text small">e.g. Remote, New York, or Bangalore</div>
+                            </div>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary w-100 py-2 fw-semibold mt-3">
+                            Complete Registration
+                        </button>
+                    </form>
+
+                    <p class="text-center text-muted small mt-4 mb-0">
+                        Already have an account? <a href="{% url 'login' %}">Log In</a> · Or <a href="{% url 'register_recruiter' %}">Register as Recruiter</a>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

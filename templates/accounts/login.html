@@ -1,0 +1,62 @@
+{% extends 'base.html' %}
+
+{% block title %}Log In - JobPortal AI{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-5">
+            <div class="card shadow-sm border-0 rounded-3">
+                <div class="card-body p-4 p-md-5">
+                    <div class="text-center mb-4">
+                        <i class="bi bi-person-lock text-primary fs-1"></i>
+                        <h3 class="fw-bold mt-2">Welcome Back</h3>
+                        <p class="text-muted small">Access your job seeker or recruiter portal</p>
+                    </div>
+
+                    <form method="post" novalidate>
+                        {% csrf_token %}
+                        {% if form.non_field_errors %}
+                            <div class="alert alert-danger py-2 small">
+                                {% for error in form.non_field_errors %}
+                                    <div>{{ error }}</div>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+
+                        <div class="mb-3">
+                            <label class="form-label small fw-semibold">Username</label>
+                            {{ form.username }}
+                            {% if form.username.errors %}
+                                <div class="text-danger small mt-1">{{ form.username.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label small fw-semibold">Password</label>
+                            {{ form.password }}
+                            {% if form.password.errors %}
+                                <div class="text-danger small mt-1">{{ form.password.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+
+                        <button type="submit" class="btn btn-primary w-100 py-2 fw-semibold mt-2">
+                            Log In
+                        </button>
+                    </form>
+
+                    <hr class="my-4">
+
+                    <div class="text-center small">
+                        Don't have an account yet?
+                        <div class="mt-2">
+                            <a href="{% url 'register_candidate' %}" class="btn btn-outline-primary btn-sm me-2">Join as Job Seeker</a>
+                            <a href="{% url 'register_recruiter' %}" class="btn btn-outline-success btn-sm">Join as Recruiter</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,96 @@
+{% extends 'base.html' %}
+
+{% block title %}Apply for {{ job.title }} - JobPortal AI{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card shadow-sm border-0 rounded-3">
+                <div class="card-body p-4 p-md-5">
+                    <div class="d-flex justify-content-between align-items-center mb-4 pb-2 border-bottom">
+                        <div>
+                            <span class="badge bg-primary-subtle text-primary border border-primary-subtle mb-2">
+                                Application Form
+                            </span>
+                            <h4 class="fw-bold mb-1">Apply for {{ job.title }}</h4>
+                            <p class="text-muted small mb-0">
+                                <i class="bi bi-building"></i> {{ job.recruiter.company_name }} &middot; 
+                                <i class="bi bi-geo-alt"></i> {{ job.location }}
+                            </p>
+                        </div>
+                        <a href="{% url 'job_detail' job.id %}" class="btn btn-outline-secondary btn-sm">
+                            &larr; Back to Job
+                        </a>
+                    </div>
+
+                    <form method="post" enctype="multipart/form-data">
+                        {% csrf_token %}
+
+                        {% if form.errors %}
+                            <div class="alert alert-danger py-2 small">
+                                {% for field, errors in form.errors.items %}
+                                    {% for error in errors %}
+                                        <div>{{ error }}</div>
+                                    {% endfor %}
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+
+                        <!-- Profile Summary Snapshot -->
+                        <div class="p-3 bg-light rounded-3 mb-4">
+                            <h6 class="fw-bold small mb-2 text-dark"><i class="bi bi-person-check text-primary me-1"></i> Applying With:</h6>
+                            <div class="small text-muted mb-1">
+                                <strong>{{ candidate.user.get_full_name|default:candidate.user.username }}</strong> &middot; {{ candidate.user.email }}
+                            </div>
+                            <div class="small text-muted mb-2">
+                                <strong>Your Skills:</strong> 
+                                {% for skill in candidate.get_all_skills_list %}
+                                    <span class="skill-badge">{{ skill }}</span>
+                                {% empty %}
+                                    <span class="text-warning">No skills on profile yet.</span>
+                                {% endfor %}
+                            </div>
+                            {% if candidate.resume_file %}
+                                <div class="small text-success">
+                                    <i class="bi bi-check-circle-fill me-1"></i> Saved Profile Resume will be used automatically unless you upload a custom one below.
+                                </div>
+                            {% else %}
+                                <div class="small text-warning">
+                                    <i class="bi bi-exclamation-triangle me-1"></i> No resume found on your profile. Please attach a PDF resume below.
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <!-- Tailored Resume Upload -->
+                        <div class="mb-4">
+                            <label class="form-label fw-semibold small">Tailored Resume (Optional PDF)</label>
+                            {{ form.resume_file }}
+                            <div class="form-text small">Upload an alternate PDF resume specific to this role (Max 5MB).</div>
+                        </div>
+
+                        <!-- Cover Letter -->
+                        <div class="mb-4">
+                            <label class="form-label fw-semibold small">Cover Letter / Note to Recruiter (Optional)</label>
+                            {{ form.cover_letter }}
+                        </div>
+
+                        <!-- AI Match Note -->
+                        <div class="alert alert-info py-2 small mb-4" role="alert">
+                            <i class="bi bi-stars text-primary me-1"></i>
+                            <strong>AI Transparency:</strong> When you submit, our NLP matching algorithm will calculate your skill match percentage against this job's stated requirements.
+                        </div>
+
+                        <div class="d-flex justify-content-end gap-2">
+                            <a href="{% url 'job_detail' job.id %}" class="btn btn-outline-secondary">Cancel</a>
+                            <button type="submit" class="btn btn-primary px-4">
+                                <i class="bi bi-send me-1"></i> Submit Application
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

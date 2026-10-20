@@ -1,0 +1,205 @@
+{% extends 'base.html' %}
+
+{% block title %}Evaluate Candidate: {{ candidate.user.get_full_name|default:candidate.user.username }} - JobPortal AI{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <!-- Breadcrumb -->
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb mb-0">
+                <li class="breadcrumb-item"><a href="{% url 'recruiter_dashboard' %}">Dashboard</a></li>
+                <li class="breadcrumb-item"><a href="{% url 'job_applicants' job.id %}">{{ job.title }} Applicants</a></li>
+                <li class="breadcrumb-item active" aria-current="page">{{ candidate.user.get_full_name|default:candidate.user.username }}</li>
+            </ol>
+        </nav>
+        <a href="{% url 'job_applicants' job.id %}" class="btn btn-outline-secondary btn-sm">
+            &larr; Back to Applicants
+        </a>
+    </div>
+
+    <div class="row g-4">
+        <!-- Candidate Profile & Details (Left Column) -->
+        <div class="col-lg-7">
+            <div class="card shadow-sm border-0 rounded-3 mb-4">
+                <div class="card-body p-4">
+                    <div class="d-flex align-items-start justify-content-between mb-3">
+                        <div>
+                            <span class="badge bg-secondary mb-2">Applicant ID: #{{ application.id }}</span>
+                            <h3 class="fw-bold mb-1">{{ candidate.user.get_full_name|default:candidate.user.username }}</h3>
+                            <p class="text-muted mb-2">{{ candidate.headline|default:"Candidate" }}</p>
+                            <div class="d-flex flex-wrap gap-3 small text-muted">
+                                <div><i class="bi bi-envelope me-1"></i> {{ candidate.user.email }}</div>
+                                {% if candidate.phone %}<div><i class="bi bi-telephone me-1"></i> {{ candidate.phone }}</div>{% endif %}
+                                {% if candidate.current_location %}<div><i class="bi bi-geo-alt me-1"></i> {{ candidate.current_location }}</div>{% endif %}
+                            </div>
+                        </div>
+                        {% if application.resume_file %}
+                            <a href="{{ application.resume_file.url }}" target="_blank" class="btn btn-outline-primary btn-sm">
+                                <i class="bi bi-file-earmark-pdf me-1"></i> Download Resume
+                            </a>
+                        {% endif %}
+                    </div>
+
+                    <hr>
+
+                    <!-- Professional Summary -->
+                    {% if candidate.bio %}
+                        <div class="mb-4">
+                            <h6 class="fw-bold text-dark">Professional Summary</h6>
+                            <p class="text-muted small mb-0">{{ candidate.bio }}</p>
+                        </div>
+                    {% endif %}
+
+                    <!-- Experience & Education -->
+                    <div class="row g-3 mb-4">
+                        <div class="col-md-6">
+                            <div class="p-3 bg-light rounded-3">
+                                <h6 class="fw-bold small mb-1"><i class="bi bi-briefcase me-1 text-primary"></i> Experience</h6>
+                                <div class="fs-5 fw-bold text-dark">{{ candidate.experience_years }} Years</div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="p-3 bg-light rounded-3">
+                                <h6 class="fw-bold small mb-1"><i class="bi bi-mortarboard me-1 text-primary"></i> Education</h6>
+                                <div class="small text-dark">{{ candidate.education|default:"Not specified" }}</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Candidate All Skills -->
+                    <div class="mb-4">
+                        <h6 class="fw-bold text-dark mb-2">All Candidate Skills</h6>
+                        <div>
+                            {% for skill in candidate.get_all_skills_list %}
+                                <span class="skill-badge">{{ skill }}</span>
+                            {% empty %}
+                                <span class="text-muted small">No skills entered.</span>
+                            {% endfor %}
+                        </div>
+                    </div>
+
+                    <!-- Cover Letter if any -->
+                    {% if application.cover_letter %}
+                        <div class="mb-4">
+                            <h6 class="fw-bold text-dark mb-2">Cover Letter</h6>
+                            <div class="p-3 bg-light rounded-3 small text-muted">
+                                {{ application.cover_letter|linebreaks }}
+                            </div>
+                        </div>
+                    {% endif %}
+
+                    <!-- Extracted Resume Text Preview -->
+                    {% if candidate.extracted_resume_text %}
+                        <div class="mt-4 pt-3 border-top">
+                            <button class="btn btn-sm btn-outline-secondary" type="button" data-bs-toggle="collapse" data-bs-target="#resumeRawCollapse" aria-expanded="false">
+                                <i class="bi bi-file-earmark-text me-1"></i> View Extracted Resume Raw Text
+                            </button>
+                            <div class="collapse mt-3" id="resumeRawCollapse">
+                                <div class="card card-body bg-light small p-3" style="max-height: 250px; overflow-y: auto;">
+                                    <pre class="mb-0" style="white-space: pre-wrap; font-family: inherit;">{{ candidate.extracted_resume_text }}</pre>
+                                </div>
+                            </div>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- AI Match Score & Application Actions (Right Column) -->
+        <div class="col-lg-5">
+            <!-- AI Match Breakdown Card (Feature C) -->
+            <div class="card shadow-sm border-0 rounded-3 mb-4 border-top border-4 border-primary">
+                <div class="card-body p-4">
+                    <div class="d-flex align-items-center justify-content-between mb-3">
+                        <span class="badge bg-primary-subtle text-primary border border-primary-subtle px-3 py-1 rounded-pill">
+                            <i class="bi bi-cpu me-1"></i> Feature C: Match Analysis
+                        </span>
+                        <small class="text-muted">TF-IDF & NLP</small>
+                    </div>
+
+                    <div class="text-center py-3">
+                        <div class="display-3 fw-bold {% if application.match_score >= 75 %}text-success{% elif application.match_score >= 50 %}text-warning{% else %}text-danger{% endif %}">
+                            {{ application.match_score|floatformat:1 }}%
+                        </div>
+                        <div class="fw-semibold text-dark">Overall Resume-to-Job Match Score</div>
+                        <p class="text-muted small mb-0">Calculated across skill overlap and requirements text similarity</p>
+                    </div>
+
+                    <div class="progress my-3" style="height: 10px;">
+                        <div class="progress-bar {% if application.match_score >= 75 %}bg-success{% elif application.match_score >= 50 %}bg-warning{% else %}bg-danger{% endif %}"
+                             role="progressbar"
+                             style="width: {{ application.match_score }}%;"
+                             aria-valuenow="{{ application.match_score }}"
+                             aria-valuemin="0"
+                             aria-valuemax="100">
+                        </div>
+                    </div>
+
+                    <!-- Skills Breakdown -->
+                    <div class="mt-4">
+                        <h6 class="fw-bold small text-success mb-2">
+                            <i class="bi bi-check-circle-fill me-1"></i> Matched Skills ({{ application.get_matched_skills_list|length }})
+                        </h6>
+                        <div class="mb-3">
+                            {% for skill in application.get_matched_skills_list %}
+                                <span class="skill-badge skill-badge-matched">{{ skill }}</span>
+                            {% empty %}
+                                <span class="text-muted small">None of the required skills directly matched.</span>
+                            {% endfor %}
+                        </div>
+
+                        <h6 class="fw-bold small text-danger mb-2">
+                            <i class="bi bi-x-circle-fill me-1"></i> Missing Required Skills ({{ application.get_missing_skills_list|length }})
+                        </h6>
+                        <div class="mb-3">
+                            {% for skill in application.get_missing_skills_list %}
+                                <span class="skill-badge skill-badge-missing">{{ skill }}</span>
+                            {% empty %}
+                                <span class="text-success small fw-semibold">All required skills matched!</span>
+                            {% endfor %}
+                        </div>
+                    </div>
+
+                    <!-- Explainability Explanation -->
+                    {% if application.similarity_explanation %}
+                        <div class="p-3 bg-light rounded-3 small text-muted mt-3">
+                            <strong class="d-block text-dark mb-1"><i class="bi bi-lightbulb text-warning me-1"></i> Match Breakdown:</strong>
+                            {{ application.similarity_explanation }}
+                        </div>
+                    {% endif %}
+
+                    <!-- Important Disclaimer Note from PRD -->
+                    <div class="alert alert-secondary py-2 px-3 small mt-3 mb-0" role="alert">
+                        <i class="bi bi-shield-exclamation text-dark me-1"></i>
+                        <strong>Important Note:</strong> The match score is an estimate of similarity, not a prediction of candidate performance. Hiring decisions must be made using human review.
+                    </div>
+                </div>
+            </div>
+
+            <!-- Application Status Update Card -->
+            <div class="card shadow-sm border-0 rounded-3">
+                <div class="card-body p-4">
+                    <h5 class="fw-bold mb-3"><i class="bi bi-sliders text-primary me-2"></i> Update Application Status</h5>
+                    <p class="text-muted small mb-3">Current Status: <span class="badge {{ application.get_status_badge_class }}">{{ application.get_status_display }}</span></p>
+
+                    <form method="post">
+                        {% csrf_token %}
+                        <div class="mb-3">
+                            <label class="form-label small fw-semibold">Change Candidate Status</label>
+                            <select name="status" class="form-select">
+                                {% for val, label in status_choices %}
+                                    <option value="{{ val }}" {% if application.status == val %}selected{% endif %}>{{ label }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <button type="submit" class="btn btn-primary w-100">
+                            <i class="bi bi-check2-circle me-1"></i> Update Status
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

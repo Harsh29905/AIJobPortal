@@ -1,0 +1,196 @@
+{% extends 'base.html' %}
+
+{% block title %}Recruiter Dashboard - JobPortal AI{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <!-- Header & Quick Actions -->
+    <div class="card shadow-sm border-0 mb-4 bg-white rounded-3">
+        <div class="card-body p-4">
+            <div class="row align-items-center">
+                <div class="col-lg-8">
+                    <div class="d-flex align-items-center gap-3">
+                        <div class="rounded-circle bg-success-subtle text-success p-3 fs-3 fw-bold d-flex align-items-center justify-content-center" style="width: 60px; height: 60px;">
+                            <i class="bi bi-building"></i>
+                        </div>
+                        <div>
+                            <h3 class="fw-bold mb-1">{{ profile.company_name }}</h3>
+                            <p class="text-muted mb-0">
+                                {% if profile.industry %}{{ profile.industry }} &middot; {% endif %}
+                                <i class="bi bi-geo-alt"></i> {{ profile.company_location|default:"Location not set" }}
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-4 text-lg-end mt-3 mt-lg-0">
+                    <a href="{% url 'recruiter_profile_edit' %}" class="btn btn-outline-secondary btn-sm me-2">
+                        <i class="bi bi-gear me-1"></i> Company Profile
+                    </a>
+                    <a href="{% url 'job_create' %}" class="btn btn-primary btn-sm">
+                        <i class="bi bi-plus-lg me-1"></i> Post New Job
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Stats Grid -->
+    <div class="row g-3 mb-4">
+        <div class="col-md-3 col-sm-6">
+            <div class="card card-stat shadow-sm p-3">
+                <div class="d-flex align-items-center justify-content-between">
+                    <div>
+                        <div class="text-muted small fw-semibold">Total Job Postings</div>
+                        <div class="stat-number">{{ total_jobs }}</div>
+                    </div>
+                    <i class="bi bi-briefcase text-primary fs-1 opacity-50"></i>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 col-sm-6">
+            <div class="card card-stat shadow-sm p-3">
+                <div class="d-flex align-items-center justify-content-between">
+                    <div>
+                        <div class="text-muted small fw-semibold">Active Openings</div>
+                        <div class="stat-number text-success">{{ active_jobs }}</div>
+                    </div>
+                    <i class="bi bi-check-circle text-success fs-1 opacity-50"></i>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 col-sm-6">
+            <div class="card card-stat shadow-sm p-3">
+                <div class="d-flex align-items-center justify-content-between">
+                    <div>
+                        <div class="text-muted small fw-semibold">Total Applications</div>
+                        <div class="stat-number text-info">{{ total_applications }}</div>
+                    </div>
+                    <i class="bi bi-people text-info fs-1 opacity-50"></i>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 col-sm-6">
+            <div class="card card-stat shadow-sm p-3">
+                <div class="d-flex align-items-center justify-content-between">
+                    <div>
+                        <div class="text-muted small fw-semibold">Shortlisted / In Progress</div>
+                        <div class="stat-number text-warning">{{ shortlisted_candidates }}</div>
+                    </div>
+                    <i class="bi bi-person-check text-warning fs-1 opacity-50"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Job Vacancies Table -->
+    <div class="card shadow-sm border-0 rounded-3">
+        <div class="card-header bg-white py-3 border-0 d-flex justify-content-between align-items-center">
+            <h5 class="fw-bold mb-0"><i class="bi bi-list-task text-primary me-2"></i> Manage Your Job Openings</h5>
+            <a href="{% url 'job_create' %}" class="btn btn-sm btn-primary">
+                <i class="bi bi-plus-circle me-1"></i> Post New Job
+            </a>
+        </div>
+        <div class="card-body p-0">
+            {% if jobs %}
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="table-light small">
+                            <tr>
+                                <th>Job Title</th>
+                                <th>Location & Type</th>
+                                <th>Required Skills</th>
+                                <th>Status</th>
+                                <th>Applicants</th>
+                                <th>Date Posted</th>
+                                <th class="text-end">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for job in jobs %}
+                                <tr>
+                                    <td>
+                                        <div class="fw-semibold">
+                                            <a href="{% url 'job_detail' job.id %}" class="text-decoration-none text-dark">
+                                                {{ job.title }}
+                                            </a>
+                                        </div>
+                                        <small class="text-muted">{{ job.get_experience_level_display }}</small>
+                                    </td>
+                                    <td>
+                                        <small class="d-block">{{ job.location }}</small>
+                                        <span class="badge bg-light text-dark border">{{ job.get_work_arrangement_display }}</span>
+                                        <span class="badge bg-light text-dark border">{{ job.get_employment_type_display }}</span>
+                                    </td>
+                                    <td>
+                                        <div style="max-width: 250px;">
+                                            {% for skill in job.get_skills_list|slice:":3" %}
+                                                <span class="skill-badge">{{ skill }}</span>
+                                            {% endfor %}
+                                            {% if job.get_skills_list|length > 3 %}
+                                                <small class="text-muted">+{{ job.get_skills_list|length|add:"-3" }} more</small>
+                                            {% endif %}
+                                        </div>
+                                    </td>
+                                    <td>
+                                        {% if job.status == 'open' %}
+                                            <span class="badge bg-success rounded-pill">Open</span>
+                                        {% else %}
+                                            <span class="badge bg-secondary rounded-pill">Closed</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <a href="{% url 'job_applicants' job.id %}" class="btn btn-sm btn-outline-primary position-relative">
+                                            <i class="bi bi-people me-1"></i> Applicants
+                                            <span class="badge bg-primary text-white ms-1">{{ job.applications_count }}</span>
+                                        </a>
+                                    </td>
+                                    <td><small class="text-muted">{{ job.created_at|date:"M d, Y" }}</small></td>
+                                    <td class="text-end">
+                                        <div class="dropdown">
+                                            <button class="btn btn-sm btn-light border dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                                Manage
+                                            </button>
+                                            <ul class="dropdown-menu dropdown-menu-end shadow-sm">
+                                                <li>
+                                                    <a class="dropdown-item" href="{% url 'job_applicants' job.id %}">
+                                                        <i class="bi bi-people me-2"></i> View Applicants
+                                                    </a>
+                                                </li>
+                                                <li>
+                                                    <a class="dropdown-item" href="{% url 'job_edit' job.id %}">
+                                                        <i class="bi bi-pencil me-2"></i> Edit Posting
+                                                    </a>
+                                                </li>
+                                                <li>
+                                                    <a class="dropdown-item" href="{% url 'job_toggle_status' job.id %}">
+                                                        <i class="bi bi-toggle2-on me-2"></i> {% if job.status == 'open' %}Close Opening{% else %}Re-open Opening{% endif %}
+                                                    </a>
+                                                </li>
+                                                <li><hr class="dropdown-divider"></li>
+                                                <li>
+                                                    <a class="dropdown-item text-danger" href="{% url 'job_delete' job.id %}">
+                                                        <i class="bi bi-trash me-2"></i> Delete Job
+                                                    </a>
+                                                </li>
+                                            </ul>
+                                        </div>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <div class="text-center py-5 text-muted">
+                    <i class="bi bi-briefcase fs-1 d-block mb-3 opacity-50"></i>
+                    <h5>No Job Postings Yet</h5>
+                    <p class="small mb-3">Create your first vacancy to start receiving AI-ranked candidate applications.</p>
+                    <a href="{% url 'job_create' %}" class="btn btn-primary">
+                        <i class="bi bi-plus-lg me-1"></i> Post Your First Job
+                    </a>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

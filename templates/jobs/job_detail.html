@@ -1,0 +1,216 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ job.title }} at {{ job.recruiter.company_name }} - JobPortal AI{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <!-- Breadcrumb -->
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb mb-0">
+                <li class="breadcrumb-item"><a href="{% url 'home' %}">Home</a></li>
+                <li class="breadcrumb-item"><a href="{% url 'job_list' %}">Jobs</a></li>
+                <li class="breadcrumb-item active" aria-current="page">{{ job.title }}</li>
+            </ol>
+        </nav>
+        <a href="{% url 'job_list' %}" class="btn btn-outline-secondary btn-sm">
+            &larr; Back to Job Search
+        </a>
+    </div>
+
+    <div class="row g-4">
+        <!-- Main Job Content (Left) -->
+        <div class="col-lg-8">
+            <div class="card shadow-sm border-0 rounded-3 mb-4">
+                <div class="card-body p-4 p-md-5">
+                    <div class="d-flex flex-wrap justify-content-between align-items-start gap-2 mb-3">
+                        <div>
+                            <span class="badge bg-primary-subtle text-primary border border-primary-subtle mb-2">
+                                {{ job.get_work_arrangement_display }} &middot; {{ job.get_employment_type_display }}
+                            </span>
+                            <h2 class="fw-bold mb-1">{{ job.title }}</h2>
+                            <div class="text-muted">
+                                <i class="bi bi-building me-1"></i> <strong class="text-dark">{{ job.recruiter.company_name }}</strong> &middot; 
+                                <i class="bi bi-geo-alt me-1"></i> {{ job.location }}
+                            </div>
+                        </div>
+
+                        {% if job.status == 'closed' %}
+                            <span class="badge bg-danger fs-6 px-3 py-2">Position Closed</span>
+                        {% endif %}
+                    </div>
+
+                    <!-- Meta Badges -->
+                    <div class="row g-2 p-3 bg-light rounded-3 my-4 small">
+                        <div class="col-sm-4">
+                            <span class="text-muted d-block">Experience Required</span>
+                            <strong class="text-dark">{{ job.get_experience_level_display }}</strong>
+                        </div>
+                        <div class="col-sm-4">
+                            <span class="text-muted d-block">Salary Range</span>
+                            <strong class="text-dark">
+                                {% if job.min_salary %}${{ job.min_salary|floatformat:0 }} - ${{ job.max_salary|floatformat:0 }} / yr{% else %}Undisclosed{% endif %}
+                            </strong>
+                        </div>
+                        <div class="col-sm-4">
+                            <span class="text-muted d-block">Date Posted</span>
+                            <strong class="text-dark">{{ job.created_at|date:"M d, Y" }}</strong>
+                        </div>
+                    </div>
+
+                    <!-- Required Skills -->
+                    <div class="mb-4">
+                        <h5 class="fw-bold mb-2">Required Skills & Technologies</h5>
+                        <div>
+                            {% for skill in job.get_skills_list %}
+                                <span class="skill-badge fs-6">{{ skill }}</span>
+                            {% empty %}
+                                <span class="text-muted small">No specific skills listed.</span>
+                            {% endfor %}
+                        </div>
+                    </div>
+
+                    <!-- Job Description -->
+                    <div class="mb-4">
+                        <h5 class="fw-bold mb-2">Job Description</h5>
+                        <div class="text-muted" style="white-space: pre-line; line-height: 1.7;">
+                            {{ job.description }}
+                        </div>
+                    </div>
+
+                    <!-- Job Requirements / Responsibilities -->
+                    {% if job.requirements %}
+                        <div class="mb-4">
+                            <h5 class="fw-bold mb-2">Key Requirements & Qualifications</h5>
+                            <div class="text-muted" style="white-space: pre-line; line-height: 1.7;">
+                                {{ job.requirements }}
+                            </div>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Sidebar (Apply CTA, AI Match Preview, Company Info) -->
+        <div class="col-lg-4">
+            <!-- Application CTA Card -->
+            <div class="card shadow-sm border-0 rounded-3 mb-4">
+                <div class="card-body p-4 text-center">
+                    {% if is_recruiter_owner %}
+                        <div class="alert alert-info py-2 small mb-3">
+                            <i class="bi bi-info-circle me-1"></i> You posted this job vacancy.
+                        </div>
+                        <a href="{% url 'job_applicants' job.id %}" class="btn btn-primary w-100 mb-2">
+                            <i class="bi bi-people me-1"></i> View Applicants ({{ job.applications_count }})
+                        </a>
+                        <a href="{% url 'job_edit' job.id %}" class="btn btn-outline-secondary w-100">
+                            <i class="bi bi-pencil me-1"></i> Edit Posting
+                        </a>
+                    {% elif user_application %}
+                        <div class="p-3 bg-light rounded-3 text-center mb-3">
+                            <i class="bi bi-check-circle-fill text-success fs-1 mb-2 d-block"></i>
+                            <h5 class="fw-bold mb-1">Application Submitted</h5>
+                            <p class="text-muted small mb-2">You applied on {{ user_application.applied_at|date:"M d, Y" }}</p>
+                            <span class="badge {{ user_application.get_status_badge_class }} fs-6">
+                                Status: {{ user_application.get_status_display }}
+                            </span>
+                        </div>
+                        <a href="{% url 'my_applications' %}" class="btn btn-outline-primary w-100">
+                            View My Applications
+                        </a>
+                    {% elif job.status == 'open' %}
+                        {% if user.is_authenticated and user.is_candidate %}
+                            <h5 class="fw-bold mb-2">Interested in this role?</h5>
+                            <p class="text-muted small mb-3">Apply with your candidate profile and resume.</p>
+                            <a href="{% url 'apply_job' job.id %}" class="btn btn-primary btn-lg w-100 shadow-sm">
+                                <i class="bi bi-send me-1"></i> Apply Now
+                            </a>
+                        {% elif user.is_authenticated and user.is_recruiter %}
+                            <div class="alert alert-secondary py-2 small mb-0">
+                                Logged in as recruiter. Only job seekers can apply.
+                            </div>
+                        {% else %}
+                            <h5 class="fw-bold mb-2">Apply for this Job</h5>
+                            <p class="text-muted small mb-3">Log in or create a candidate profile to apply.</p>
+                            <a href="{% url 'login' %}?next={{ request.path }}" class="btn btn-primary w-100 mb-2">
+                                Log In to Apply
+                            </a>
+                            <a href="{% url 'register_candidate' %}" class="btn btn-outline-secondary w-100 btn-sm">
+                                Register as Job Seeker
+                            </a>
+                        {% endif %}
+                    {% else %}
+                        <div class="alert alert-warning py-2 mb-0">
+                            This vacancy is currently closed.
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- AI Live Match Preview (If Candidate is Logged In) -->
+            {% if user.is_authenticated and user.is_candidate and ai_match_preview %}
+                <div class="card shadow-sm border-0 rounded-3 mb-4 border-top border-4 border-primary">
+                    <div class="card-body p-4">
+                        <div class="d-flex align-items-center justify-content-between mb-2">
+                            <span class="badge bg-primary-subtle text-primary border border-primary-subtle">
+                                <i class="bi bi-stars me-1"></i> AI Match Score Preview
+                            </span>
+                            <span class="fw-bold fs-5 {% if ai_match_preview.score >= 75 %}text-success{% elif ai_match_preview.score >= 50 %}text-warning{% else %}text-danger{% endif %}">
+                                {{ ai_match_preview.score }}%
+                            </span>
+                        </div>
+                        <div class="progress mb-3" style="height: 6px;">
+                            <div class="progress-bar {% if ai_match_preview.score >= 75 %}bg-success{% elif ai_match_preview.score >= 50 %}bg-warning{% else %}bg-danger{% endif %}"
+                                 role="progressbar"
+                                 style="width: {{ ai_match_preview.score }}%;"></div>
+                        </div>
+
+                        <div class="small">
+                            <div class="text-success fw-semibold mb-1">
+                                <i class="bi bi-check-circle me-1"></i> Matched ({{ ai_match_preview.matched_skills|length }}):
+                            </div>
+                            <div class="mb-2">
+                                {% for s in ai_match_preview.matched_skills %}
+                                    <span class="skill-badge skill-badge-matched">{{ s }}</span>
+                                {% empty %}
+                                    <span class="text-muted small">No direct skill matches</span>
+                                {% endfor %}
+                            </div>
+
+                            {% if ai_match_preview.missing_skills %}
+                                <div class="text-danger fw-semibold mb-1">
+                                    <i class="bi bi-x-circle me-1"></i> Missing:
+                                </div>
+                                <div>
+                                    {% for s in ai_match_preview.missing_skills %}
+                                        <span class="skill-badge skill-badge-missing">{{ s }}</span>
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            {% endif %}
+
+            <!-- Company Card -->
+            <div class="card shadow-sm border-0 rounded-3">
+                <div class="card-body p-4">
+                    <h6 class="fw-bold mb-3"><i class="bi bi-building me-1 text-primary"></i> About {{ job.recruiter.company_name }}</h6>
+                    {% if job.recruiter.company_description %}
+                        <p class="text-muted small mb-3">{{ job.recruiter.company_description|truncatewords:40 }}</p>
+                    {% endif %}
+                    <ul class="list-unstyled small text-muted mb-0">
+                        {% if job.recruiter.industry %}
+                            <li class="mb-2"><i class="bi bi-tag me-2"></i> {{ job.recruiter.industry }}</li>
+                        {% endif %}
+                        {% if job.recruiter.company_location %}
+                            <li class="mb-2"><i class="bi bi-geo-alt me-2"></i> {{ job.recruiter.company_location }}</li>
+                        {% endif %}
+                        
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

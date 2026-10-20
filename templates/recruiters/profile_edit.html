@@ -1,0 +1,63 @@
+{% extends 'base.html' %}
+
+{% block title %}Edit Company Profile - JobPortal AI{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card shadow-sm border-0 rounded-3">
+                <div class="card-body p-4 p-md-5">
+                    <div class="d-flex justify-content-between align-items-center mb-4 pb-2 border-bottom">
+                        <div>
+                            <h4 class="fw-bold mb-1">Company Profile</h4>
+                            <p class="text-muted small mb-0">Showcase your organization to prospective candidates</p>
+                        </div>
+                        <a href="{% url 'recruiter_dashboard' %}" class="btn btn-outline-secondary btn-sm">
+                            &larr; Back to Dashboard
+                        </a>
+                    </div>
+
+                    <form method="post" enctype="multipart/form-data">
+                        {% csrf_token %}
+
+                        <div class="mb-4">
+                            <label class="form-label fw-semibold small">Company Name *</label>
+                            {{ form.company_name }}
+                        </div>
+
+                        <div class="row g-3 mb-4">
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold small">Company Website</label>
+                                {{ form.company_website }}
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold small">Location / Headquarters</label>
+                                {{ form.company_location }}
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold small">Industry</label>
+                                {{ form.industry }}
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold small">Recruitment Contact Email</label>
+                                {{ form.contact_email }}
+                            </div>
+                        </div>
+
+                        <div class="mb-4">
+                            <label class="form-label fw-semibold small">About Company</label>
+                            {{ form.company_description }}
+                        </div>
+
+                        <div class="d-flex justify-content-end gap-2">
+                            <a href="{% url 'recruiter_dashboard' %}" class="btn btn-outline-secondary">Cancel</a>
+                            <button type="submit" class="btn btn-primary px-4">Save Company Profile</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

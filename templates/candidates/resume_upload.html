@@ -1,0 +1,99 @@
+{% extends 'base.html' %}
+
+{% block title %}Upload & Analyze Resume - JobPortal AI{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card shadow-sm border-0 rounded-3">
+                <div class="card-body p-4 p-md-5">
+                    <div class="d-flex justify-content-between align-items-center mb-4 pb-2 border-bottom">
+                        <div>
+                            <span class="badge bg-primary-subtle text-primary border border-primary-subtle px-3 py-1 rounded-pill mb-2">
+                                <i class="bi bi-cpu me-1"></i> Feature A: AI Resume Skill Extraction
+                            </span>
+                            <h4 class="fw-bold mb-1">Upload & Analyze Your Resume</h4>
+                            <p class="text-muted small mb-0">Our local NLP parser extracts your skills to match you with top job opportunities</p>
+                        </div>
+                        <a href="{% url 'candidate_dashboard' %}" class="btn btn-outline-secondary btn-sm">
+                            &larr; Back to Dashboard
+                        </a>
+                    </div>
+
+                    <form method="post" enctype="multipart/form-data">
+                        {% csrf_token %}
+
+                        {% if form.errors %}
+                            <div class="alert alert-danger py-2 small">
+                                {% for field, errors in form.errors.items %}
+                                    {% for error in errors %}
+                                        <div>{{ error }}</div>
+                                    {% endfor %}
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+
+                        <div class="p-4 border rounded-3 bg-light text-center mb-4">
+                            <i class="bi bi-file-earmark-pdf text-danger fs-1 d-block mb-3"></i>
+                            <h6 class="fw-bold mb-2">Choose your PDF Resume</h6>
+                            <p class="text-muted small mb-3">Upload your latest resume in PDF format (Max size: 5MB)</p>
+                            
+                            <div class="d-inline-block text-start" style="max-width: 400px; width: 100%;">
+                                {{ form.resume_file }}
+                            </div>
+
+                            {% if profile.resume_file %}
+                                <div class="mt-3 small">
+                                    <span class="text-success"><i class="bi bi-check-circle-fill me-1"></i> Current file:</span>
+                                    <a href="{{ profile.resume_file.url }}" target="_blank" class="fw-semibold text-primary">
+                                        View Current Resume PDF
+                                    </a>
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <div class="d-flex justify-content-end gap-2">
+                            <a href="{% url 'candidate_dashboard' %}" class="btn btn-outline-secondary">Cancel</a>
+                            <button type="submit" class="btn btn-primary px-4">
+                                <i class="bi bi-cloud-arrow-up me-1"></i> Upload & Extract Skills
+                            </button>
+                        </div>
+                    </form>
+
+                    <!-- Extracted Skills Display -->
+                    {% if profile.extracted_skills %}
+                        <div class="mt-5 pt-4 border-top">
+                            <div class="d-flex align-items-center gap-2 mb-3">
+                                <i class="bi bi-check-all text-success fs-4"></i>
+                                <h5 class="fw-bold mb-0">AI Extracted Skills from Your Resume</h5>
+                            </div>
+                            <p class="text-muted small mb-3">These skills were automatically recognized and used for intelligent job recommendations:</p>
+                            <div>
+                                {% for skill in profile.get_extracted_skills_list %}
+                                    <span class="skill-badge skill-badge-matched me-1 mb-1">
+                                        <i class="bi bi-tag-fill me-1 small"></i>{{ skill }}
+                                    </span>
+                                {% endfor %}
+                            </div>
+
+                            {% if profile.extracted_resume_text %}
+                                <div class="mt-4">
+                                    <button class="btn btn-sm btn-outline-secondary" type="button" data-bs-toggle="collapse" data-bs-target="#resumeTextCollapse" aria-expanded="false">
+                                        <i class="bi bi-file-text me-1"></i> View Extracted Text Preview
+                                    </button>
+                                    <div class="collapse mt-3" id="resumeTextCollapse">
+                                        <div class="card card-body bg-light small p-3" style="max-height: 250px; overflow-y: auto;">
+                                            <pre class="mb-0" style="white-space: pre-wrap; font-family: inherit;">{{ profile.extracted_resume_text }}</pre>
+                                        </div>
+                                    </div>
+                                </div>
+                            {% endif %}
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

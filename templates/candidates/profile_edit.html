@@ -1,0 +1,77 @@
+{% extends 'base.html' %}
+
+{% block title %}Edit Candidate Profile - JobPortal AI{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card shadow-sm border-0 rounded-3">
+                <div class="card-body p-4 p-md-5">
+                    <div class="d-flex justify-content-between align-items-center mb-4 pb-2 border-bottom">
+                        <div>
+                            <h4 class="fw-bold mb-1">Edit Candidate Profile</h4>
+                            <p class="text-muted small mb-0">Keep your skills and preferences up to date for precise AI matches</p>
+                        </div>
+                        <a href="{% url 'candidate_dashboard' %}" class="btn btn-outline-secondary btn-sm">
+                            &larr; Back to Dashboard
+                        </a>
+                    </div>
+
+                    <form method="post">
+                        {% csrf_token %}
+
+                        <div class="mb-4">
+                            <label class="form-label fw-semibold small">Professional Headline</label>
+                            {{ form.headline }}
+                            <div class="form-text small">e.g. Senior Python Developer | Django & MySQL Architect</div>
+                        </div>
+
+                        <div class="row g-3 mb-4">
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold small">Phone Number</label>
+                                {{ form.phone }}
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold small">Years of Professional Experience</label>
+                                {{ form.experience_years }}
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold small">Current Location</label>
+                                {{ form.current_location }}
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold small">Preferred Work Location</label>
+                                {{ form.preferred_location }}
+                                <div class="form-text small">e.g. Remote or city preference</div>
+                            </div>
+                        </div>
+
+                        <div class="mb-4">
+                            <label class="form-label fw-semibold small">Technical & Professional Skills</label>
+                            {{ form.skills }}
+                            <div class="form-text small">Comma-separated skills list (e.g. Python, Django, MySQL, Docker, React, AWS, Git).</div>
+                        </div>
+
+                        <div class="mb-4">
+                            <label class="form-label fw-semibold small">Education & Degrees</label>
+                            {{ form.education }}
+                            <div class="form-text small">Degrees, universities, honors, or certifications.</div>
+                        </div>
+
+                        <div class="mb-4">
+                            <label class="form-label fw-semibold small">About You / Professional Bio</label>
+                            {{ form.bio }}
+                        </div>
+
+                        <div class="d-flex justify-content-end gap-2">
+                            <a href="{% url 'candidate_dashboard' %}" class="btn btn-outline-secondary">Cancel</a>
+                            <button type="submit" class="btn btn-primary px-4">Save Profile Changes</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

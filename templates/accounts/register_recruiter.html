@@ -1,0 +1,101 @@
+{% extends 'base.html' %}
+
+{% block title %}Register as Recruiter - JobPortal AI{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-7 col-md-9">
+            <div class="card shadow-sm border-0 rounded-3">
+                <div class="card-body p-4 p-md-5">
+                    <div class="text-center mb-4">
+                        <span class="badge bg-success-subtle text-success border border-success-subtle px-3 py-2 rounded-pill mb-2">
+                            <i class="bi bi-building me-1"></i> Recruiter / Employer Registration
+                        </span>
+                        <h3 class="fw-bold">Hire Top Talent with AI Matching</h3>
+                        <p class="text-muted small">Post jobs, review ranked applicants, and track candidate statuses</p>
+                    </div>
+
+                    <form method="post" novalidate>
+                        {% csrf_token %}
+
+                        {% if form.non_field_errors %}
+                            <div class="alert alert-danger py-2 small">
+                                {% for error in form.non_field_errors %}
+                                    <div>{{ error }}</div>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+
+                        <h6 class="fw-bold text-success mb-3"><i class="bi bi-shield-lock me-1"></i> Recruiter Account</h6>
+                        <div class="row g-3 mb-3">
+                            <div class="col-md-6">
+                                <label class="form-label small fw-semibold">Username *</label>
+                                {{ form.username }}
+                                {% if form.username.errors %}<div class="text-danger small">{{ form.username.errors.0 }}</div>{% endif %}
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label small fw-semibold">Work Email Address *</label>
+                                {{ form.email }}
+                                {% if form.email.errors %}<div class="text-danger small">{{ form.email.errors.0 }}</div>{% endif %}
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label small fw-semibold">First Name *</label>
+                                {{ form.first_name }}
+                                {% if form.first_name.errors %}<div class="text-danger small">{{ form.first_name.errors.0 }}</div>{% endif %}
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label small fw-semibold">Last Name *</label>
+                                {{ form.last_name }}
+                                {% if form.last_name.errors %}<div class="text-danger small">{{ form.last_name.errors.0 }}</div>{% endif %}
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label small fw-semibold">Password *</label>
+                                {{ form.password1 }}
+                                {% if form.password1.errors %}<div class="text-danger small">{{ form.password1.errors.0 }}</div>{% endif %}
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label small fw-semibold">Confirm Password *</label>
+                                {{ form.password2 }}
+                                {% if form.password2.errors %}<div class="text-danger small">{{ form.password2.errors.0 }}</div>{% endif %}
+                            </div>
+                        </div>
+
+                        <hr class="my-4">
+
+                        <h6 class="fw-bold text-success mb-3"><i class="bi bi-building me-1"></i> Company Details</h6>
+                        <div class="mb-3">
+                            <label class="form-label small fw-semibold">Company Name *</label>
+                            {{ form.company_name }}
+                            {% if form.company_name.errors %}<div class="text-danger small">{{ form.company_name.errors.0 }}</div>{% endif %}
+                        </div>
+
+                        <div class="row g-3 mb-3">
+                            <div class="col-md-6">
+                                <label class="form-label small fw-semibold">Company Website</label>
+                                {{ form.company_website }}
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label small fw-semibold">Headquarters / Location</label>
+                                {{ form.company_location }}
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label small fw-semibold">Industry Sector</label>
+                                {{ form.industry }}
+                            </div>
+                        </div>
+
+                        <button type="submit" class="btn btn-success w-100 py-2 fw-semibold mt-3">
+                            Create Recruiter Profile
+                        </button>
+                    </form>
+
+                    <p class="text-center text-muted small mt-4 mb-0">
+                        Already have an account? <a href="{% url 'login' %}">Log In</a> · Or <a href="{% url 'register_candidate' %}">Register as Candidate</a>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

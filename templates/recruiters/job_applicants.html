@@ -1,0 +1,148 @@
+{% extends 'base.html' %}
+
+{% block title %}Applicants for {{ job.title }} - JobPortal AI{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <!-- Breadcrumb & Job Summary -->
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb mb-0">
+                <li class="breadcrumb-item"><a href="{% url 'recruiter_dashboard' %}">Dashboard</a></li>
+                <li class="breadcrumb-item active" aria-current="page">{{ job.title }} Applicants</li>
+            </ol>
+        </nav>
+        <a href="{% url 'recruiter_dashboard' %}" class="btn btn-outline-secondary btn-sm">
+            &larr; Back to Dashboard
+        </a>
+    </div>
+
+    <div class="card shadow-sm border-0 mb-4 rounded-3">
+        <div class="card-body p-4">
+            <div class="d-flex flex-wrap justify-content-between align-items-center gap-2">
+                <div>
+                    <span class="badge bg-primary-subtle text-primary border border-primary-subtle mb-1">
+                        {{ job.get_work_arrangement_display }} &middot; {{ job.get_employment_type_display }}
+                    </span>
+                    <h3 class="fw-bold mb-1">{{ job.title }}</h3>
+                    <p class="text-muted small mb-0">
+                        <i class="bi bi-geo-alt"></i> {{ job.location }} &middot; 
+                        Posted on {{ job.created_at|date:"M d, Y" }} &middot; 
+                        Total Applicants: <strong>{{ applicants|length }}</strong>
+                    </p>
+                </div>
+                <div>
+                    <a href="{% url 'job_detail' job.id %}" class="btn btn-outline-primary btn-sm me-2" target="_blank">
+                        <i class="bi bi-box-arrow-up-right me-1"></i> Public Job Page
+                    </a>
+                    <a href="{% url 'job_edit' job.id %}" class="btn btn-outline-secondary btn-sm">
+                        <i class="bi bi-pencil me-1"></i> Edit Job
+                    </a>
+                </div>
+            </div>
+
+            <!-- Filter Status Pills -->
+            <div class="mt-4 pt-3 border-top d-flex flex-wrap align-items-center gap-2">
+                <span class="small fw-semibold text-muted me-2">Filter by Status:</span>
+                <a href="{% url 'job_applicants' job.id %}" class="btn btn-sm {% if not selected_status %}btn-dark{% else %}btn-outline-secondary{% endif %} rounded-pill">
+                    All Applicants
+                </a>
+                <a href="{% url 'job_applicants' job.id %}?status=applied" class="btn btn-sm {% if selected_status == 'applied' %}btn-secondary{% else %}btn-outline-secondary{% endif %} rounded-pill">
+                    Applied
+                </a>
+                <a href="{% url 'job_applicants' job.id %}?status=shortlisted" class="btn btn-sm {% if selected_status == 'shortlisted' %}btn-primary{% else %}btn-outline-primary{% endif %} rounded-pill">
+                    Shortlisted
+                </a>
+                <a href="{% url 'job_applicants' job.id %}?status=interview" class="btn btn-sm {% if selected_status == 'interview' %}btn-info text-dark{% else %}btn-outline-info{% endif %} rounded-pill">
+                    Interview
+                </a>
+                <a href="{% url 'job_applicants' job.id %}?status=hired" class="btn btn-sm {% if selected_status == 'hired' %}btn-success{% else %}btn-outline-success{% endif %} rounded-pill">
+                    Hired
+                </a>
+                <a href="{% url 'job_applicants' job.id %}?status=rejected" class="btn btn-sm {% if selected_status == 'rejected' %}btn-danger{% else %}btn-outline-danger{% endif %} rounded-pill">
+                    Rejected
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Applicants List -->
+    <div class="card shadow-sm border-0 rounded-3">
+        <div class="card-header bg-white py-3 border-0 d-flex justify-content-between align-items-center">
+            <h5 class="fw-bold mb-0">
+                <i class="bi bi-people-fill text-primary me-2"></i> Ranked Applicants
+                <small class="text-muted fw-normal ms-2">(Ranked by AI Match Score)</small>
+            </h5>
+        </div>
+        <div class="card-body p-0">
+            {% if applicants %}
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="table-light small">
+                            <tr>
+                                <th>Candidate</th>
+                                <th>Experience & Location</th>
+                                <th>AI Match Score</th>
+                                <th>Matching Skills</th>
+                                <th>Status</th>
+                                <th>Applied Date</th>
+                                <th class="text-end">Evaluation</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for app in applicants %}
+                                <tr>
+                                    <td>
+                                        <div class="fw-semibold">
+                                            {{ app.candidate.user.get_full_name|default:app.candidate.user.username }}
+                                        </div>
+                                        <small class="text-muted">{{ app.candidate.headline|default:"Candidate" }}</small>
+                                    </td>
+                                    <td>
+                                        <div><small class="fw-semibold">{{ app.candidate.experience_years }} yrs exp</small></div>
+                                        <small class="text-muted"><i class="bi bi-geo-alt"></i> {{ app.candidate.current_location|default:"Not specified" }}</small>
+                                    </td>
+                                    <td>
+                                        <span class="badge {{ app.get_score_badge_class }} rounded-pill px-3 py-2 fs-6">
+                                            <i class="bi bi-cpu me-1"></i> {{ app.match_score }}%
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <div style="max-width: 250px;">
+                                            {% for skill in app.get_matched_skills_list|slice:":3" %}
+                                                <span class="skill-badge skill-badge-matched">{{ skill }}</span>
+                                            {% empty %}
+                                                <small class="text-muted">No direct skill overlap</small>
+                                            {% endfor %}
+                                            {% if app.get_matched_skills_list|length > 3 %}
+                                                <small class="text-muted">+{{ app.get_matched_skills_list|length|add:"-3" }} more</small>
+                                            {% endif %}
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <span class="badge {{ app.get_status_badge_class }} rounded-pill">
+                                            {{ app.get_status_display }}
+                                        </span>
+                                    </td>
+                                    <td><small class="text-muted">{{ app.applied_at|date:"M d, Y" }}</small></td>
+                                    <td class="text-end">
+                                        <a href="{% url 'applicant_detail' app.id %}" class="btn btn-sm btn-primary">
+                                            Review Profile &rarr;
+                                        </a>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <div class="text-center py-5 text-muted">
+                    <i class="bi bi-people fs-1 d-block mb-3 opacity-50"></i>
+                    <h5>No Applicants Found</h5>
+                    <p class="small mb-0">No candidates have applied matching this status filter yet.</p>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
